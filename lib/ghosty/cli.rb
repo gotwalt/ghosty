@@ -10,24 +10,18 @@ module Ghosty
 
       port = 3100
       assets_directory = 'assets'
-
+      base_uri = "http://#{IPSocket.getaddress(Socket.gethostname)}:#{port}"
 
       web = Ghosty::Web.new(assets_directory, port)
       web.async.start
 
-
-      base_uri = "http://#{IPSocket.getaddress(Socket.gethostname)}:#{port}"
-
-
-
+      # Wait for the web to start
       sleep 2
 
-
       player = Ghosty::Player.new(base_uri, assets_directory)
+      player.async.perform
 
-      puts 'Playing'
-      player.perform
-
+      # Final sleep is to keep things alive
       sleep
     end
 

@@ -1,6 +1,7 @@
 require 'sonos'
 require 'celluloid'
 require 'addressable/uri'
+require 'cgi'
 
 module Ghosty
   class Player
@@ -12,14 +13,40 @@ module Ghosty
       @system = Sonos::System.new
     end
 
-    def select_speaker
+    def perform
+      speaker = random_speaker
+      file = ghost_url
+
+      previous = speaker.now_playing
+      previous_uri = Addressable::URI.parse(previous[:uri])
+      previous_uri.query = nil
+
+      puts "Playing #{file} on #{speaker.name}"
+      speaker.play(file)
+      track_info = speaker.now_playing
+      speaker.play
+
+      # Determine the track length, add a few extra seconds for padding
+      duration = Time.parse(track_info[:track_duration]).sec + 2
+      puts "Sleeping for #{duration}s"
+      sleep 0 # duration
+
+      puts "Resetting speaker source to #{previous_uri}"
+      # reset the current track
+      speaker.play(previous_uri.to_s)
+      speaker.play
+    end
+
+    private
+
+    def random_speaker
       @system.speakers.map do |speaker|
-        speaker if speaker.name == 'Office' # get_player_state[:state] == 'PAUSED_PLAYBACK'
+        speaker #speaker.get_player_state[:state] == 'PAUSED_PLAYBACK'
       end.compact.sample
     end
 
     # Finds a file to play and returns it as a URI
-    def select_file
+    def ghost_url
       file = Dir.glob(File.join(@path, '*.mp3')).sample
 
       if file
@@ -27,14 +54,6 @@ module Ghosty
         uri.path = File.basename(file)
         uri.to_s
       end
-    end
-
-    def perform
-      speaker = select_speaker
-      file = select_file
-
-      speaker.play(file)
-      speaker.play
     end
 
   end
