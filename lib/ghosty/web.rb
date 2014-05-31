@@ -5,14 +5,13 @@ module Ghosty
   class Web
     include Celluloid
 
-    def initialize(port = 3100)
+    def initialize(path, port = 3100)
       @port = port
+      @path = File.join File.expand_path('../../../', __FILE__), path
     end
 
     def start
-      path = File.expand_path('../../../assets', __FILE__)
-
-      app = Rack::Static.new(NotFound.new, root: path, urls: [''], index: 'index.html')
+      app = Rack::Static.new(NotFound.new, root: @path, urls: [''], index: 'index.html')
 
       @server = Rack::Server.new({
         app: app,
