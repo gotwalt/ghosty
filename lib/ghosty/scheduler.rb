@@ -20,7 +20,28 @@ module Ghosty
 
     def perform
       puts 'Adding ghost'
-      @ghost = Ghosty::Ghost.new(random_speaker, random_track)
+      isolated_from_group(random_speaker) do |speaker|
+        Ghosty::Ghost.new(speaker, random_track)
+      end
+    end
+
+    def isolated_from_group(speaker)
+      puts 'Isolating speaker from group'
+      old_group = @system.groups.find{|group| group.slave_speakers.map(&:uid).include?(speaker.uid) }
+
+      if old_group
+        old_master = speaker.group_master
+        old_group.disband
+      end
+
+      yield speaker
+
+      puts 'Resetting group'
+      if old_group
+        old_group.slave_speakers.each do |speaker|
+          speaker.join old_master
+        end
+      end
     end
 
     def random_speaker
