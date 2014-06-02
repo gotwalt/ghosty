@@ -8,7 +8,8 @@ module Ghosty
 
     def initialize(speaker, track)
       puts 'Initializing ghost'
-      @speaker = speaker
+
+      @speaker = speaker.group_master
 
       save_state
       play(track)
@@ -41,7 +42,7 @@ module Ghosty
 
       if @previous
         speaker.select_track @previous[:queue_position]
-        speaker.seek Time.parse("1/1/1970 #{@previous[:current_position]} -0000" ).sec
+        speaker.seek Time.parse("1/1/1970 #{@previous[:current_position]} -0000" ).to_i
       end
 
       speaker.play if @was_playing
