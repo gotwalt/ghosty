@@ -15,7 +15,6 @@ module Ghosty
     def start
       puts 'Starting scheduler'
       @system = Sonos::System.new
-      p random_speaker
       perform
     end
 
