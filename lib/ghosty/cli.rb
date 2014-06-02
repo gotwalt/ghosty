@@ -16,13 +16,13 @@ module Ghosty
       web.async.start
 
       # Wait for the web to start
-      sleep 2
+      sleep 1
 
       player = Ghosty::Player.new(base_uri, assets_directory)
       player.async.perform
 
       # Final sleep is to keep things alive
-      sleep
+      sleep 20
     end
 
   end
