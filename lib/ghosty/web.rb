@@ -7,7 +7,7 @@ module Ghosty
 
     def initialize(path, port = 3100)
       @port = port
-      @path = File.join File.expand_path('../../../', __FILE__), path
+      @path = path
     end
 
     def start
@@ -17,10 +17,6 @@ module Ghosty
         app: app,
         :Port => @port
       }).start
-    end
-
-    def shutdown
-      @server.shutdown if @server.respond_to?(:shutdown)
     end
 
     class NotFound

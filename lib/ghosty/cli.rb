@@ -1,6 +1,8 @@
 require 'thor'
 require 'ghosty/web'
-require 'ghosty/player'
+require 'ghosty/scheduler'
+
+Celluloid.logger = nil
 
 module Ghosty
   class Cli < Thor
@@ -8,8 +10,8 @@ module Ghosty
     desc 'start', 'Runs the service'
     def start
 
+      assets_directory = File.join File.expand_path('../../../', __FILE__), 'assets'
       port = 3100
-      assets_directory = 'assets'
       base_uri = "http://#{IPSocket.getaddress(Socket.gethostname)}:#{port}"
 
       web = Ghosty::Web.new(assets_directory, port)
@@ -18,8 +20,7 @@ module Ghosty
       # Wait for the web to start
       sleep 1
 
-      player = Ghosty::Player.new(base_uri, assets_directory)
-      player.async.perform
+      Ghosty::Scheduler.new(base_uri, assets_directory)
 
       # Final sleep is to keep things alive
       sleep 20
