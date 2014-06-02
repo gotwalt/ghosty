@@ -19,11 +19,15 @@ module Ghosty
     def save_state
       puts 'Saving speaker state'
       speaker.pause if @was_playing = playing?
+      speaker.unmute if @was_muted = speaker.muted?
+      @previous_volume = speaker.volume
       @previous = speaker.now_playing
     end
 
     def play(track)
       puts "Playing track #{track} on speaker #{speaker.name}"
+
+      speaker.volume = rand(15)
 
       # queue up the track
       speaker.play track
@@ -43,6 +47,9 @@ module Ghosty
       if @previous
         speaker.select_track @previous[:queue_position]
         speaker.seek Time.parse("1/1/1970 #{@previous[:current_position]} -0000" ).to_i
+
+        speaker.volume = @previous_volume
+        speaker.mute if @was_muted
       end
 
       speaker.play if @was_playing
