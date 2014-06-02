@@ -20,10 +20,7 @@ module Ghosty
       # Wait for the web to start
       sleep 1
 
-      Ghosty::Scheduler.new(base_uri, assets_directory)
-
-      # Final sleep is to keep things alive
-      sleep 20
+      Ghosty::Scheduler.new(base_uri, assets_directory).start
     end
 
   end

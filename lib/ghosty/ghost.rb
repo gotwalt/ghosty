@@ -1,4 +1,4 @@
-require 'sonos'
+require 'sonos_extensions'
 require 'celluloid'
 require 'cgi'
 
@@ -7,7 +7,6 @@ module Ghosty
     attr_reader :speaker
 
     def initialize(speaker, track)
-      puts 'Initializing ghost'
 
       @speaker = speaker.group_master
 
@@ -17,8 +16,7 @@ module Ghosty
     end
 
     def save_state
-      puts 'Saving speaker state'
-      speaker.pause if @was_playing = playing?
+      speaker.pause if @was_playing = speaker.playing?
       speaker.unmute if @was_muted = speaker.muted?
       @previous_volume = speaker.volume
       @previous = speaker.now_playing
@@ -27,7 +25,7 @@ module Ghosty
     def play(track)
       puts "Playing track #{track} on speaker #{speaker.name}"
 
-      speaker.volume = rand(15)
+      speaker.volume = 10 + rand(15)
 
       # queue up the track
       speaker.play track
@@ -36,11 +34,10 @@ module Ghosty
       speaker.play
 
       # pause the thread until the track is done
-      sleep(0.2) while playing?
+      sleep(0.2) while speaker.playing?
     end
 
     def restore_state
-      puts 'Restoring state'
       # the sonos app does this. I think it tells the player to think of the master queue as active again
       speaker.play speaker.uid.gsub('uuid', 'x-rincon-queue') + '#0'
 
@@ -55,17 +52,8 @@ module Ghosty
       speaker.play if @was_playing
     end
 
-    def playing?
-      state = speaker.get_player_state[:state]
-      !['PAUSED_PLAYBACK', 'STOPPED'].include?(state)
-    end
 
   end
 end
 
-module Sonos::Endpoint::AVTransport
-  def select_track(index)
-    parse_response send_transport_message('Seek', "<Unit>TRACK_NR</Unit><Target>#{index}</Target>")
-  end
-end
 

@@ -1,6 +1,8 @@
 require 'celluloid'
 require 'ghosty/ghost'
 require 'addressable/uri'
+require 'sonos_extensions'
+require 'timers'
 
 module Ghosty
   class Scheduler
@@ -13,20 +15,22 @@ module Ghosty
     end
 
     def start
-      puts 'Starting scheduler'
       @system = Sonos::System.new
+      @timer = Timers.new
+
+      @timer.every(10) { perform }
       perform
+
+      loop { @timer.wait }
     end
 
     def perform
-      puts 'Adding ghost'
       isolated_from_group(random_speaker) do |speaker|
-        Ghosty::Ghost.new(speaker, random_track)
+        Ghosty::Ghost.new(speaker, random_track) if speaker
       end
     end
 
     def isolated_from_group(speaker)
-      puts 'Isolating speaker from group'
       old_group = @system.groups.find{|group| group.slave_speakers.map(&:uid).include?(speaker.uid) }
 
       if old_group
@@ -36,7 +40,6 @@ module Ghosty
 
       yield speaker
 
-      puts 'Resetting group'
       if old_group
         old_group.slave_speakers.each do |speaker|
           speaker.join old_master
@@ -45,9 +48,13 @@ module Ghosty
     end
 
     def random_speaker
-      @system.speakers.map do |speaker|
-        speaker if speaker.name == 'Office' #speaker.get_player_state[:state] == 'PAUSED_PLAYBACK'
+      speaker = @system.speakers.select do |speaker|
+        !speaker.playing? && speaker.uid != @previous_uid
       end.compact.sample
+
+      @previous_uid = speaker.uid if speaker
+
+      speaker
     end
 
     # Finds a file to play and returns it as a URI
