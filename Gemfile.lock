@@ -40,6 +40,7 @@ GEM
       thor
     systemu (2.6.4)
     thor (0.19.1)
+    timecop (0.7.0)
     timers (2.0.0)
       hitimes
     uuid (2.3.7)
@@ -58,4 +59,5 @@ DEPENDENCIES
   rack
   sonos
   thor
+  timecop
   timers

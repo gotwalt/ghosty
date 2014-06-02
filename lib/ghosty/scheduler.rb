@@ -2,11 +2,13 @@ require 'celluloid'
 require 'ghosty/ghost'
 require 'addressable/uri'
 require 'sonos_extensions'
-require 'timers'
 
 module Ghosty
   class Scheduler
     include Celluloid
+
+    VALID_HOURS = [20, 21, 22, 23, 0, 1, 2, 3]
+    MIN_FREQUENCY = 45
 
     def initialize(base_uri, assets_directory)
       @base_uri = Addressable::URI.parse(base_uri)
@@ -16,12 +18,13 @@ module Ghosty
 
     def start
       @system = Sonos::System.new
-      @timer = Timers.new
 
-      @timer.every(10) { perform }
-      perform
-
-      loop { @timer.wait }
+      loop do
+        duration = (MIN_FREQUENCY + rand(120)) * 60
+        puts "Scheduled for #{Time.now + duration}"
+        sleep duration
+        perform if VALID_HOURS.include?(Time.now.hour)
+      end
     end
 
     def perform
