@@ -19,7 +19,7 @@ module Ghosty
     end
 
     def self.instance
-      @instance ||= MonoLogger.new(File.join(File.expand_path('../../../', __FILE__), 'ghosty.log'))
+      @instance ||= MonoLogger.new(STDOUT)
     end
 
   end

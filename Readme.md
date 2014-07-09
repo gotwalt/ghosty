@@ -15,7 +15,7 @@ Ghosty turns any Sonos-powered home into the haunted house of the future. This i
 * **minimum_frequency** controls how frequently the ghost will appear.
 
 ## Running
-For normal ghost operations, `foreman start` will start a simple HTTP server to serve files and launch the daemon, which will randomly schedule plays. Ghosty keeps a log of plays in *./ghosty.log*.
+For normal ghost operations, `foreman start` will start a simple HTTP server to serve files and launch the daemon, which will randomly schedule plays.
 
 ## CLI Methods
 * `ghosty daemon` - starts the scheduling daemon
