@@ -1,9 +1,8 @@
 source "http://rubygems.org"
 
-ruby '2.0.0'
-gem 'sonos'
-gem 'rack'
+gem 'sonos', github: 'gotwalt/sonos'
+gem 'redis'
 gem 'addressable'
 gem 'celluloid'
 gem 'thor'
-gem 'timecop'
+gem 'settingslogic'
