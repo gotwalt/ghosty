@@ -1,13 +1,23 @@
 require 'thor'
-require 'ghosty/scheduler'
-require 'ghosty/settings'
+require 'irb'
 
 module Ghosty
   class Cli < Thor
 
-    desc 'start', 'Runs the service'
-    def start
+    desc 'daemon', 'Runs the service'
+    def daemon
       Ghosty::Scheduler.new.start
+    end
+
+    desc 'trigger', 'Plays a single sound and then exits'
+    def trigger
+      p Ghosty::Scheduler.new.trigger
+    end
+
+    desc 'cli', 'Launches IRB instance with everything required'
+    def cli
+      ARGV.clear
+      IRB.start
     end
   end
 end
