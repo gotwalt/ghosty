@@ -2,32 +2,44 @@ require 'ghosty/performer'
 require 'ghosty/settings'
 require 'addressable/uri'
 require 'sonos'
-require 'logger'
+require 'mono_logger'
 
 module Ghosty
   class Scheduler
-
-    VALID_HOURS = [20, 21, 22, 23, 0, 1, 2, 3]
-    MIN_FREQUENCY = 45
 
     attr_reader :system
 
     def initialize
       @system = Sonos::System.new
+
+      trap("SIGINT") do
+        logger.info 'Stopped'
+        exit 130
+      end
     end
 
     def start
-      #loop do
-        duration = (MIN_FREQUENCY + rand(120)) * 60
-        puts "Scheduled for #{Time.now + duration}"
-        #sleep duration
-        perform #if VALID_HOURS.include?(Time.now.hour)
-      #end
-    end
+      logger.info 'Started'
 
-    def perform
-      result = Ghosty::Performer.new(system, tracks.sample).perform
-      logger.info result.inspect
+      loop do
+        frequency = Ghosty::Settings.minimum_frequency
+        wait_time = (frequency + rand(frequency * 4)) * 60
+
+        logger.info "Scheduling for #{Time.now + wait_time}"
+
+        sleep wait_time
+
+        if Ghosty::Settings.valid_hours.include?(Time.now.hour)
+          begin
+            results = Ghosty::Performer.new(system, tracks.sample).perform
+            logger.info "Played #{File.basename(results[:track])} on #{results[:speaker]} at volume #{results[:volume]} (#{results[:original_volume]})"
+          rescue Savon::SOAPFault => ex
+            logger.error "SOAP Error - #{ex.to_hash.inspect}"
+          end
+        else
+          logger.info 'Skipping - time is out of bounds'
+        end
+      end
     end
 
     def tracks
@@ -42,7 +54,7 @@ module Ghosty
     end
 
     def logger
-      @logger ||= Logger.new(File.join(File.expand_path('../../../', __FILE__), 'ghosty.log'))
+      @logger ||= MonoLogger.new(File.join(File.expand_path('../../../', __FILE__), 'ghosty.log'))
     end
 
 
