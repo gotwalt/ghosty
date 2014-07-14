@@ -33,7 +33,7 @@ module Ghosty
         if Ghosty::Settings.valid_hours.include?(Time.now.hour)
           trigger
         else
-          logger.info 'Skipping - time is out of bounds'
+          Ghosty::Logger.info 'Skipping - time is out of bounds'
         end
       end
     end
